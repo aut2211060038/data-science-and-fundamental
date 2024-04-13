@@ -1,0 +1,42 @@
+import requests
+from bs4 import BeautifulSoup
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+# Function to retrieve IMDb movie reviews
+def get_imdb_reviews(movie_id):
+ url = f"https://www.imdb.com/title/{movie_id}/reviews"
+ response = requests.get(url)
+ soup = BeautifulSoup(response.text, 'html.parser')
+ reviews = []
+ 
+ for review in soup.find_all(class_='text show-more__control'):
+ reviews.append(review.text)
+ 
+ return reviews
+# Function to perform sentiment analysis using NLTK
+def analyze_sentiment(reviews):
+ sid = SentimentIntensityAnalyzer()
+ sentiment_scores = {'positive': 0, 'neutral': 0, 'negative': 0}
+ 
+ for review in reviews:
+ sentiment = sid.polarity_scores(review)
+ if sentiment['compound'] >= 0.05:
+ sentiment_scores['positive'] += 1
+ elif sentiment['compound'] <= -0.05:
+ sentiment_scores['negative'] += 1
+ else:
+ sentiment_scores['neutral'] += 1
+ 
+ return sentiment_scores
+# Example usage
+if _name_ == "_main_":
+ movie_id = "tt0111161" # IMDb ID for the movie "The Shawshank Redemption"
+ reviews = get_imdb_reviews(movie_id)
+ 
+ if reviews:
+ sentiment_scores = analyze_sentiment(reviews)
+ print("Sentiment Analysis Results:")
+ print(f"Positive reviews: {sentiment_scores['positive']}")
+ print(f"Neutral reviews: {sentiment_scores['neutral']}")
+ print(f"Negative reviews: {sentiment_scores['negative']}")
+ else:
+ print("Failed to retrieve reviews."
